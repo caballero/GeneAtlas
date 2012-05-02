@@ -14,29 +14,32 @@ weigthed gene list [0,1).
 
 geneatlas.pl [PARAMETERS]
 
-   Parameters      Description
+   Parameters       Description
    
-   -d --dataset    Select data set to use, "all" shows all data sets available.
+   -d --dataset     Select data set to use, "all" shows all data sets available.
 
-   -l --list       List samples in data set.
+   -l --list        List samples in data set.
 
-   -s --select     Select samples, the value is a list of numbers or the name 
-                   of the samples, a basic RegEx is applied in text mode. 
-                   Multiple sources can be separated by commas.
+   -s --select      Select samples, the value is a list of numbers or the name 
+                    of the samples, a basic RegEx is applied in text mode. 
+                    Multiple sources can be separated by commas.
 
-   -e --exclude    Exclude samples, similar to "select" option, but it will
-                   skip the samples in the computation.
+   -e --exclude     Exclude samples, similar to "select" option, but it will
+                    skip the samples in the computation.
 
-   -m --method     Method for enrichment, multiple values are collapsed using:
-                   a) maximal [default], b) average
+   -m --method      Method for enrichment, multiple values are collapsed using:
+                    a) maximal [default], b) average
+                   
+   -t --transcript  Report genes at the transcript level (default is collapsing
+                    transcripts values to the gene level).
 
-   -o --out        Write ouput to this file [default: stdout]
+   -o --out         Write ouput to this file [default: stdout]
    
-   -h --help       Show this screen.
+   -h --help        Show this screen.
    
-   -v --verbose    Activate verbose mode.
+   -v --verbose     Activate verbose mode.
    
-      --version    Print version and exit.
+      --version     Print version and exit.
    
 =head1 EXAMPLES
 
@@ -88,35 +91,40 @@ use Getopt::Long;
 use Pod::Usage;
 
 # Default parameters
-my $help          = undef;      # Print help
-my $verbose       = undef;      # Verbose mode
-my $version       = undef;      # Version call flag
-my $dataset       = 'all';
-my $list          = undef;
-my $select        = undef;
-my $exclude       = undef;
-my $method        = 'maximal';
-my $out           = undef;
+my $help           =     undef;      # Print help
+my $verbose        =     undef;      # Verbose mode
+my $version        =     undef;      # Version call flag
+my $dataset        =     'all';
+my $list           =     undef;
+my $select         =     undef;
+my $exclude        =     undef;
+my $method         = 'maximal';
+my $out            =     undef;
+my $trans          =     undef;
 
 # Main variables
-my $our_version   = 0.1;        # Script version number
-my $datadir       = 'data';     # Where to find the data sets
-my $max_sp        = -100;
-my %select        = ();
-my %contrast      = ();
-my %sp            = ();
+my $our_version    =       0.1;     # Script version number
+my $datadir        =    'data';     # Where to find the data sets
+my $max_sp         =     -1000;
+my $max_xp         =     -1000;
+my $min_sp         =      1000;
+my $min_xp         =      1000;
+my %select         =        ();
+my %contrast       =        ();
+my %data           =        ();
 
 # Calling options
 GetOptions(
-    'h|help'      => \$help,
-    'v|verbose'   => \$verbose,
-    'version'     => \$version,
-    'd|dataset:s' => \$dataset,
-    'l|list'      => \$list,
-    's|select:s'  => \$select,
-    'e|exclude:s' => \$exclude,
-    'm|method:s'  => \$method,
-    'o|out:s'     => \$out
+    'h|help'       => \$help,
+    'v|verbose'    => \$verbose,
+    'version'      => \$version,
+    'd|dataset:s'  => \$dataset,
+    'l|list'       => \$list,
+    's|select:s'   => \$select,
+    'e|exclude:s'  => \$exclude,
+    'm|method:s'   => \$method,
+    't|transcript' => \$trans,
+    'o|out:s'      => \$out
 ) or pod2usage(-verbose => 2);
     
 pod2usage(-verbose => 2) if (defined $help);
@@ -135,11 +143,6 @@ unless ($method =~ m/maximal|average/) {
 # Obtain list of samples to process
 readSamples();
 
-# Create output file if required
-if (defined $out) {
-    open STDOUT, ">$out" or die "cannot create $out\n";
-}
-
 ## MAIN PROCESS
 warn "reading data\n" if (defined $verbose);
 my $fh = "gunzip -c $datadir/$dataset.tab.gz | ";
@@ -149,16 +152,41 @@ while (<DAT>) {
     next if (m/^GeneSymbol/i);
     my ($gene, $probe, @values) = split (/\t/, $_);
     next if ($gene eq '-'); # skip missing gene ids
-    my $sp = specificity(@values);
-    $sp{"$gene\t$probe"} = $sp;
+    my ($sp, $xp) = analyze(@values);
+    $data{$gene}{$probe}{'sp'} = $sp;
+    $data{$gene}{$probe}{'xp'} = $xp;
     $max_sp = $sp if ($sp > $max_sp);
+    $min_sp = $sp if ($sp < $min_sp);
+    $max_xp = $xp if ($xp > $max_xp);
+    $min_xp = $xp if ($xp < $min_xp);
+    #warn "$gene\t$probe\t$sp\t$xp\t$max_sp\t$max_xp\n" if (defined $verbose);
 }
 close DAT;
+warn "max_sp = $max_sp, max_xp = $max_xp\n" if (defined $verbose);
+warn "min_sp = $min_sp, min_xp = $min_xp\n" if (defined $verbose);
 
-warn "normalizing values\n" if (defined $verbose);
-while ( my ($id, $sp) = each %sp) {
-    my $nsp = $sp / $max_sp;
-    print "$id\t$nsp\n";
+# Create output file if required
+if (defined $out) {
+    open STDOUT, ">$out" or die "cannot create $out\n";
+}
+
+# Data output and normalization
+warn "normalizing values and writing output\n" if (defined $verbose);
+foreach my $gene (sort (keys %data)) { 
+    my ($score, $norm_xp, $norm_sp);
+    my $best_score = -1000;
+    foreach my $probe (keys %{ $data{$gene} }) {
+        $norm_sp = ($data{$gene}{$probe}{'sp'} + abs($min_sp)) / ($max_sp + abs($min_sp));
+        $norm_xp = ($data{$gene}{$probe}{'xp'} + abs($min_xp)) / ($max_xp + abs($min_xp));
+        $score   = $norm_sp * $norm_xp;
+        if (defined $trans) {
+            print "$gene:$probe\t$score\n";
+        }
+        else {
+            $best_score = $score if ($score > $best_score);
+        }
+    }
+    print "$gene\t$best_score\n" unless (defined $trans);
 }
 
 ###################################
@@ -201,8 +229,11 @@ sub showSamples {
 
 # readSamples => Obtain the list of samples to compare
 sub readSamples {
-    my @sel = split (/,/, $select);
-    my @exc = split (/,/, $exclude);
+    my @exc;
+    my @sel;
+    
+    @sel = split (/,/, $select);
+    @exc = split (/,/, $exclude) if (defined $exclude);
     
     my $n = 0;
     warn "looking for samples\n" if (defined $verbose);
@@ -210,27 +241,34 @@ sub readSamples {
     while (<F>) {
         chomp;
         $n++;
+        my $skip = 0;
         foreach my $s (@sel) {
             if ($s =~ m/^\d+$/) {
-                $select{$n - 1} = $_ if ($s == $n);
-                next;
+                if ($s == $n) {
+                    $select{$n - 1} = $_;
+                    $skip = 1;
+                }
             }
-            else {
-                $select{$n - 1 } = $_ if (m/$s/i);
-                next;
-            }
-        }
-        
-        foreach my $e (@exc) {
-            if ($e =~ m/^\d+$/) {
-                next if ($e == $n);
-            }
-            else {
-                next if (m/$e/i);
+            else { 
+                if (m/$s/i) {
+                    $select{$n - 1 } = $_;
+                    $skip = 1;
+                }
             }
         }
         
-        $contrast{$n - 1} = $_;
+        if (defined $exclude) {
+            foreach my $e (@exc) {
+                if ($e =~ m/^\d+$/) {
+                    $skip = 1 if ($e == $n);
+                }
+                else {
+                    $skip = 1 if (m/$e/i);
+                }
+            }
+        }
+        
+        $contrast{$n - 1} = $_ if ($skip == 0);
     }
     close F;
     my $s = join ",", sort values %select;
@@ -239,7 +277,7 @@ sub readSamples {
 }
 
 # specificity => Compute the specificity score
-sub specificity {
+sub analyze {
     my @val = @_;
     my @sel = ();
     my @con = ();
@@ -251,22 +289,25 @@ sub specificity {
         push @con, $val[$i] if (defined $contrast{$i});
     }
     if ($method eq 'maximal') {
-        $sel = max(@sel);
-        $con = max(@con);
+        $sel = log2(max(@sel));
+        $con = log2(max(@con));
     }
     elsif ($method eq 'average') {
-        $sel = mean(@sel);
-        $con = mean(@con);
+        $sel = log2(mean(@sel));
+        $con = log2(mean(@con));
     }
     
     $sp = $sel - $con;
-    return $sp;
+    return ($sp, $sel);
 }
 
 
 # max => Returns maximal value
 sub max {
     my $max = -1;
+    if ($#_ == 0) {
+        return $_[0];
+    }
     foreach my $x (@_) {
         $max = $x if ($x > $max);
     }
@@ -278,9 +319,23 @@ sub mean {
     my $mean = -1;
     my $num  =  0;
     my $sum  =  0;
+    if ($#_ == 0) {
+        return $_[0];
+    }
     foreach my $x (@_) {
         $num++;
         $sum += $x;
     }
     return $sum / $num;
+}
+
+# log2 => Returns the log2 value
+sub log2 {
+    my $val = shift @_;
+    if ($val > 0) {
+        return log($val) / log(2);
+    }
+    else {
+        return 0;
+    }
 }
