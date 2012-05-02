@@ -149,7 +149,7 @@ while (<DAT>) {
     next if (m/^GeneSymbol/i);
     my ($gene, $probe, @values) = split (/\t/, $_);
     next if ($gene eq '-'); # skip missing gene ids
-    my $sp = specificity(\@values);
+    my $sp = specificity(@values);
     $sp{"$gene\t$probe"} = $sp;
     $max_sp = $sp if ($sp > $max_sp);
 }
