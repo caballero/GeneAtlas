@@ -3,7 +3,7 @@ GeneAtlas
 
 DESCRIPTION
 
-GeneAtlas is simple gene enrichment in normal tissue expression profiles.
+GeneAtlas is a simple gene enrichment in normal tissue expression profiles.
 We have a selection of publically available data sets for normal human tissue profiling, all data sets are located in the data/ directory, after gene normalization and quantification, please contact me if you want more details about the data preprocessing.
 Input are a selection of tissues to compare, output is a text file with the 
 weigthed gene list [0,1).

@@ -6,7 +6,7 @@ geneatlas.pl
 
 =head1 DESCRIPTION
 
-GeneAtlas is simple gene enrichment in normal tissue expression profiles.
+GeneAtlas is a simple gene enrichment in normal tissue expression profiles.
 Input are a selection of tissues to compare, output is a text file with the 
 weigthed gene list [0,1).
 
@@ -32,6 +32,9 @@ geneatlas.pl [PARAMETERS]
                    
    -t --transcript  Report genes at the transcript level (default is collapsing
                     transcripts values to the gene level).
+                    
+   -i --inverse     Reverse scale (default is 0 -> 1, being 1 high expressed/
+                    tissue-specific genes, this invert the scale 1 -> 0).
 
    -o --out         Write ouput to this file [default: stdout]
    
@@ -101,6 +104,7 @@ my $exclude        =     undef;
 my $method         = 'maximal';
 my $out            =     undef;
 my $trans          =     undef;
+my $inverse        =     undef;
 
 # Main variables
 my $our_version    =       0.1;     # Script version number
@@ -124,6 +128,7 @@ GetOptions(
     'e|exclude:s'  => \$exclude,
     'm|method:s'   => \$method,
     't|transcript' => \$trans,
+    'i|inverse'    => \$inverse,
     'o|out:s'      => \$out
 ) or pod2usage(-verbose => 2);
     
@@ -179,6 +184,7 @@ foreach my $gene (sort (keys %data)) {
         $norm_sp = ($data{$gene}{$probe}{'sp'} + abs($min_sp)) / ($max_sp + abs($min_sp));
         $norm_xp = ($data{$gene}{$probe}{'xp'} + abs($min_xp)) / ($max_xp + abs($min_xp));
         $score   = $norm_sp * $norm_xp;
+        $score   = 1 - $score if (defined $inverse);
         if (defined $trans) {
             print "$gene:$probe\t$score\n";
         }
