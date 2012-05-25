@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>GeneAtlas by caballero</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>GeneAtlas</h1>
+        <p>GeneAtlas is a simple gene enrichment in normal tissue expression profiles.</p>
+        <p class="view"><a href="https://github.com/caballero/GeneAtlas">View the Project on GitHub <small>caballero/GeneAtlas</small></a></p>
+        <ul>
+          <li><a href="https://github.com/caballero/GeneAtlas/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/caballero/GeneAtlas/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/caballero/GeneAtlas">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>GeneAtlas</h1>
+
+<p>DESCRIPTION</p>
+
+<p>GeneAtlas is a simple gene enrichment in normal tissue expression profiles.
+We have a selection of publically available data sets for normal human tissue profiling, all data sets are located in the data/ directory, after gene normalization and quantification, please contact me if you want more details about the data preprocessing.
+Input are a selection of tissues to compare, output is a text file with the 
+weigthed gene list [0,1).</p>
+
+<p>USAGE</p>
+
+<pre><code>  geneatlas.pl [PARAMETERS]
+
+  Parameters       Description
+
+  -d --dataset     Select data set to use, "all" shows all data sets available.
+
+  -l --list        List samples in data set.
+
+  -s --select      Select samples, the value is a list of numbers or the name 
+                   of the samples, a basic RegEx is applied in text mode. 
+                   Multiple sources can be separated by commas.
+
+  -e --exclude     Exclude samples, similar to "select" option, but it will
+                   skip the samples in the computation.
+
+  -m --method      Method for enrichment, multiple values are collapsed using:
+                   a) maximal [default], b) average
+
+  -c --score       Method to compute the score: a) norlog, b) wilson [default].
+                   "norlog" is the normalized value of the log-enriched-ratio
+                   multiplied by the normalized expression level.
+                   "wilson" is the lower bound of Wilson score confidence 
+                   interval for a Bernoulli parameter (95% conf.)
+
+  -t --transcript  Report genes at the transcript level (default is collapsing
+                   transcripts values to the gene level).
+
+  -o --out         Write ouput to this file [default: stdout]
+
+  -h --help        Show this screen.
+
+  -v --verbose     Activate verbose mode.
+
+  --version        Print version and exit.
+</code></pre>
+
+<p>EXAMPLES</p>
+
+<pre><code>  1. Show available data sets
+     perl bin/geneatlas.pl -d all
+
+  2. Show samples in one data set
+     perl bin/geneatlas.pl -d GSE1133 -l
+
+  3. Compute enrichment in the Appendix in data set GSE1133_microrray
+     perl bin/geneatlas.pl -d GSE1133_microrray -s 7
+     perl bin/geneatlas.pl -d GSE1133_microrray -s Appendix # this also works
+
+  4. Compute enrichment in the Appendix in data set GSE1133_microrray excluding CD* samples 
+     perl bin/geneatlas.pl -d GSE1133_microrray -s 7 -e 10,15,20,29,36,38,43,61,66
+     perl bin/geneatlas.pl -d GSE1133_microrray -s Appendix -e CD # this also works
+
+  5. Change the method to average values
+     perl bin/geneatlas.pl -d GSE1133_microrray -s 7 -m average
+</code></pre>
+
+<p>AUTHOR</p>
+
+<p>Juan Caballero, Institute for Systems Biology @ 2012</p>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/caballero">caballero</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+    
+  </body>
+</html>
