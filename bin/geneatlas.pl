@@ -157,6 +157,10 @@ unless ($score_method =~ m/norlog|wilson/) {
     die"Unknown method: $score_method\nSupported are 'wilson' and 'norlog'\n";
 }
 
+unless (defined $select) {
+    die "You must select something, list samples with -l\n";
+}
+
 # Obtain list of samples to process
 readSamples();
 
@@ -315,18 +319,18 @@ sub analyze {
         push @con, $val[$i] if (defined $contrast{$i});
     }
     if ($method eq 'maximal') {
-        $sel = log2(max(@sel));
-        $con = log2(max(@con));
+        $sel = max(@sel);
+        $con = max(@con);
     }
     elsif ($method eq 'average') {
-        $sel = log2(mean(@sel));
-        $con = log2(mean(@con));
+        $sel = mean(@sel);
+        $con = mean(@con);
     }
     if ($score_method eq 'wilson') {
         $sp = wilson($sel, $con);
     }
     elsif ($score_method eq 'norlog') {
-        $sp = $sel - $con;
+        $sp = log2($sel) - log2($con);
     }
     else {
         #duh?
