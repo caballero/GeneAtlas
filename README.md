@@ -27,6 +27,12 @@ USAGE
       
       -m --method      Method for enrichment, multiple values are collapsed using:
                        a) maximal [default], b) average
+
+      -c --score       Method to compute the score: a) norlog, b) wilson [default].
+                       "norlog" is the normalized value of the log-enriched-ratio
+                       multiplied by the normalized expression level.
+                       "wilson" is the lower bound of Wilson score confidence 
+                       interval for a Bernoulli parameter (95% conf.)
       
       -t --transcript  Report genes at the transcript level (default is collapsing
                        transcripts values to the gene level).
