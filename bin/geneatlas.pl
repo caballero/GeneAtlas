@@ -29,6 +29,12 @@ geneatlas.pl [PARAMETERS]
 
    -m --method      Method for enrichment, multiple values are collapsed using:
                     a) maximal [default], b) average
+                    
+   -c --score       Method to compute the score: a) norlog, b) wilson [default].
+                    "norlog" is the normalized value of the log-enriched-ratio
+                    multiplied by the normalized expression level.
+                    "wilson" is the lower bound of Wilson score confidence 
+                    interval for a Bernoulli parameter (95% conf.)
                    
    -t --transcript  Report genes at the transcript level (default is collapsing
                     transcripts values to the gene level).
@@ -105,6 +111,7 @@ my $method         = 'maximal';
 my $out            =     undef;
 my $trans          =     undef;
 my $inverse        =     undef;
+my $score_method   =  'wilson';
 
 # Main variables
 my $our_version    =       0.1;     # Script version number
@@ -129,6 +136,7 @@ GetOptions(
     'm|method:s'   => \$method,
     't|transcript' => \$trans,
     'i|inverse'    => \$inverse,
+    'c|score'      => \$score_method,
     'o|out:s'      => \$out
 ) or pod2usage(-verbose => 2);
     
@@ -143,6 +151,10 @@ unless (-e "$datadir/$dataset.samples") {
 showSamples() if (defined $list);
 unless ($method =~ m/maximal|average/) {
     die"Unknown method: $method\nSupported are 'maximal' and 'average'\n";
+}
+
+unless ($score_method =~ m/norlog|wilson/) {
+    die"Unknown method: $score_method\nSupported are 'wilson' and 'norlog'\n";
 }
 
 # Obtain list of samples to process
@@ -164,7 +176,6 @@ while (<DAT>) {
     $min_sp = $sp if ($sp < $min_sp);
     $max_xp = $xp if ($xp > $max_xp);
     $min_xp = $xp if ($xp < $min_xp);
-    #warn "$gene\t$probe\t$sp\t$xp\t$max_sp\t$max_xp\n" if (defined $verbose);
 }
 close DAT;
 warn "max_sp = $max_sp, max_xp = $max_xp\n" if (defined $verbose);
@@ -181,9 +192,18 @@ foreach my $gene (sort (keys %data)) {
     my ($score, $norm_xp, $norm_sp);
     my $best_score = -1000;
     foreach my $probe (keys %{ $data{$gene} }) {
-        $norm_sp = ($data{$gene}{$probe}{'sp'} + abs($min_sp)) / ($max_sp + abs($min_sp));
-        $norm_xp = ($data{$gene}{$probe}{'xp'} + abs($min_xp)) / ($max_xp + abs($min_xp));
-        $score   = $norm_sp * $norm_xp;
+        if ($score_method eq 'norlog') {
+            $norm_sp = ($data{$gene}{$probe}{'sp'} + abs($min_sp)) / ($max_sp + abs($min_sp));
+            $norm_xp = ($data{$gene}{$probe}{'xp'} + abs($min_xp)) / ($max_xp + abs($min_xp));
+            $score   = $norm_sp * $norm_xp;
+        }
+        elsif ($score_method eq 'wilson') {
+            $score = $data{$gene}{$probe}{'sp'};
+        }
+        else {
+            # duh?
+        }
+        
         $score   = 1 - $score if (defined $inverse);
         if (defined $trans) {
             print "$gene:$probe\t$score\n";
@@ -302,8 +322,15 @@ sub analyze {
         $sel = log2(mean(@sel));
         $con = log2(mean(@con));
     }
-    
-    $sp = $sel - $con;
+    if ($score_method eq 'wilson') {
+        $sp = wilson($sel, $con);
+    }
+    elsif ($score_method eq 'norlog') {
+        $sp = $sel - $con;
+    }
+    else {
+        #duh?
+    }
     return ($sp, $sel);
 }
 
@@ -344,4 +371,19 @@ sub log2 {
     else {
         return 0;
     }
+}
+
+# wilson => Returns the lower bound of Wilson score confidence interval for 
+#           a Bernoulli parameter (95% confidence interval)
+sub wilson {
+    my ($positive, $negative) = @_;
+    my $score;
+    if (($positive + $negative) > 0) {
+        $score = (($positive + 1.9208) / ($positive + $negative) - 1.96 * sqrt(($positive * $negative) / ($positive + $negative) + 0.9604) / ($positive + $negative)) / (1 + 3.8416 / ($positive + $negative));
+        $score = sprintf("%.12f", $score);
+    }
+    else {
+        $score = 'NA';
+    }
+    return $score;
 }
