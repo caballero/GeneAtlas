@@ -387,7 +387,7 @@ sub wilson {
         $score = sprintf("%.12f", $score);
     }
     else {
-        $score = 'NA';
+        $score = 0;
     }
     return $score;
 }
