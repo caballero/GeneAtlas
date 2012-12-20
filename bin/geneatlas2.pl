@@ -139,6 +139,76 @@ __CHART__
 ;
     }
 }
+elsif (defined param('tissue')) {
+    print "<html>\n<head>\n<title>Gene Atlas Interface</title>\n$style\n";
+    
+    my $tissue = param('tissue');
+    my $table  = param('dataset');
+    my $minexp = param('minexp');
+    my $maxexp = param('maxexp');
+    my @data   = ();
+    my $data   = "var data = new google.visualization.DataTable();\n";
+       $data  .= "data.addColumn('string','Tissue');\n";   
+    # Get samples names
+    $sql = "SELECT * FROM samples WHERE dataset = '$table';";
+    $sth = $dbh->prepare("$sql")  or fatalError("Error: preparing query '$sql'");
+	$sth-> execute() or fatalError("Error: executing query '$sql'");
+	while (my ($id, $samples) = $sth->fetchrow_array()) {
+	    my @samples = split (/,/, $samples);
+	    foreach my $sample (@samples) { push @data, "'$sample'";  }
+	    last; # only the fist one
+	}
+	
+	# Get data
+    $sql = "SELECT * FROM $table WHERE $tissue >= $minexp and $tissue <= $maxexp)";
+    $sth = $dbh->prepare("$sql")  or fatalError("Error: preparing query '$sql'");
+	$sth-> execute() or fatalError("Error: executing query '$sql'");
+	while (my @res = $sth->fetchrow_array()) {
+	    my $gen   = shift @res;
+	    my $id    = shift @res;
+	    $data    .= "data.addColumn('number','$gen:$id');\n";
+	    my $i     = 0;
+	    foreach my $val (@res) {
+	        $val = sprintf ("%.2f", $val);
+	        $data[$i] .= ",$val";
+	        $i++;
+	    }
+	}
+	
+	$data .= "data.addRows([\n";
+	foreach my $row (@data) {
+	    $data .= "[$row],\n";
+	}
+	$data  =~ s/,$//;
+	$data .= "]);\n";
+	
+	if ($sth->rows == 0) {
+	    print "</head>\n";
+		print p("No genes found with $tissue in $table [$minexp-$maxexp]!");
+	}
+	# print chart
+	else {
+	    print <<__CHART__
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <script type="text/javascript">
+    google.load("visualization", "1", {packages:["table"]});
+    google.setOnLoadCallback(drawTable);
+    function drawTable() {
+      $data
+      
+      var table = new google.visualization.Table(document.getElementById('table_div'));
+      table.draw(data, {showRowNumber: true});
+    }
+  </script>
+  </head>
+  <body>
+    <h2>GENTLE: Gene Expression in Normal Tissues</h2>
+    <hr>
+    <p>Search: $tissue in $table [$minexp-$maxexp]</p>
+    <div id="table_div"></div>
+  </body>
+__CHART__
+}
 else {
     print "<html>\n<head>\n<title>Gene Atlas Interface</title>\n$style\n</head>\n<body>";
     print h2("GENTLE: Gene Expression in Normal Tissues"), hr();
@@ -153,6 +223,18 @@ else {
             " Height: ",
             textfield(-name => 'height', -size => 4, -value => 300),
            );
+	print submit(-name => 'Plot Expression');
+	print hr();
+	print p("Search Tissue: ",
+	        textfield(-name =>  'tissue', -size => 10),
+	        " in ",
+	        popup_menu(-name => 'dataset', -values => \@datasets, -default => 'bodymap2_rnaseq'),
+	       );
+	print p("Genes with expression between: ",
+	        textfield(-name =>  'minexp', -size => 4, -value 0.01),
+	        "-",
+	        textfield(-name =>  'maxexp', -size => 4, -value 1000)
+	       );
 	print submit(-name => 'Get Expression');
 	print end_form();
 }
