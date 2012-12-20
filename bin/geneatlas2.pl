@@ -67,6 +67,7 @@ if (defined param('query')) {
     
     my $query = param('query');
     my $table = param('dataset');
+    my @data  = ();
     my $data  = "var data = google.visualization.DataTable();\n";
        $data .= "data.addColumn('string','Tissue');\n";   
     # Get samples names
@@ -89,7 +90,7 @@ if (defined param('query')) {
 	    $data    .= "data.addColumn('number','$id');\n";
 	    my $i     = 0;
 	    while (my $val = shift @res) {
-	        $data[$i] .= ",$value";
+	        $data[$i] .= ",$val";
 	        $i++;
 	    }
 	}
