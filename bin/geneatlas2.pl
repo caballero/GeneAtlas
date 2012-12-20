@@ -125,8 +125,8 @@ if (param('query') =~ m/\w+/) {
         title: '$query in $table',
         width:  $width,
         height: $height,
-        vAxis: {title: '$units'},
-        hAxis: {slantedText: true}
+        vAxis: {title: '$units', viewWindowMode: 'maximized'},
+        hAxis: {slantedText: true},
       };
       
       var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
