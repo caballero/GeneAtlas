@@ -62,14 +62,15 @@ __STYLE__
 # HTML header
 print header('text/html'); 
 
-if (defined param('query')) {
+if (defined param('query') and defined param('width') and defined param('height')) {
     print "<html>\n<head>\n<title>Gene Atlas Interface</title>\n$style\n";
     
     my $query  = param('query');
     my $table  = param('dataset');
     my $width  = param('width');
     my $height = param('height');
-    my $units  = 'RPKM'; $units = 'log2(UF)' if ($table =~ m/microarray/);
+    my $units  = 'RPKM'; 
+       $units  = 'log2(UF)' if ($table =~ m/microarray/);
     my @data   = ();
     my $data   = "var data = new google.visualization.DataTable();\n";
        $data  .= "data.addColumn('string','Tissue');\n";   
@@ -142,7 +143,7 @@ __CHART__
 ;
     }
 }
-elsif (defined param('tissue')) {
+elsif (defined param('tissue') and defined param('minexp')) {
     print "<html>\n<head>\n<title>Gene Atlas Interface</title>\n$style\n";
     
     my $tissue = param('tissue');
