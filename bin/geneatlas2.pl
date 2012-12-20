@@ -125,8 +125,8 @@ if (defined param('query') and defined param('width') and defined param('height'
         title: '$query in $table',
         width:  $width,
         height: $height,
-        vAxis.title: '$units',
-        hAxis.slantedText: true
+        vAxis: {title: '$units'},
+        hAxis: {slantedText: true}
       };
       
       var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
@@ -180,19 +180,17 @@ elsif (defined param('tissue') and defined param('minexp')) {
 	}
 	
 	$data .= "data.addRows([\n";
-	foreach my $row (@data) {
-	    $data .= "[$row],\n";
-	}
+	foreach my $row (@data) { $data .= "[$row],\n";	}
 	$data  =~ s/,$//;
 	$data .= "]);\n";
 	
 	if ($sth->rows == 0) {
 	    print "</head>\n";
-		print p("No genes found with $tissue in $table [$minexp-$maxexp]!");
+		print p("No genes found with $sql!");
 	}
 	# print chart
 	else {
-	    print <<__CHART__
+	    print <<__TABLE__
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
   <script type="text/javascript">
     google.load("visualization", "1", {packages:["table"]});
@@ -211,7 +209,7 @@ elsif (defined param('tissue') and defined param('minexp')) {
     <p>Search: $tissue in $table [$minexp-$maxexp]</p>
     <div id="table_div"></div>
   </body>
-__CHART__
+__TABLE__
 ;
     }
 }
