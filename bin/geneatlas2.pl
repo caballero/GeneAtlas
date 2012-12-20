@@ -72,7 +72,7 @@ if (param('query') =~ m/\w+/) {
     my $stack  = 'false'; 
        $stack  = 'true' if (param('stack') eq 'Yes');
     my $units  = 'RPKM'; 
-       $units  = 'log2(UF)' if ($table =~ m/microarray/);
+       $units  = 'UF' if ($table =~ m/microarray/);
     my @data   = ();
     my $data   = "var data = new google.visualization.DataTable();\n";
        $data  .= "data.addColumn('string','Tissue');\n";   
