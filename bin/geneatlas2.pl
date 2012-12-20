@@ -164,7 +164,7 @@ elsif (param('tissue') =~ m/\w+/) {
 	}
 	
 	# Get data
-    $sql = "SELECT * FROM $table WHERE $tissue >= $minexp and $tissue <= $maxexp)";
+    $sql = "SELECT * FROM $table WHERE $tissue >= $minexp and $tissue <= $maxexp";
     $sth = $dbh->prepare("$sql")  or fatalError("Error: preparing query '$sql'");
 	$sth-> execute() or fatalError("Error: executing query '$sql'");
 	while (my @res = $sth->fetchrow_array()) {
