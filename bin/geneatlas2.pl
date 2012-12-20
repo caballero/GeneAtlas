@@ -126,7 +126,7 @@ if (defined param('query') and defined param('width') and defined param('height'
         width:  $width,
         height: $height,
         vAxis.title: '$units',
-        hAxis.slantedText: 1
+        hAxis.slantedText: true
       };
       
       var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
