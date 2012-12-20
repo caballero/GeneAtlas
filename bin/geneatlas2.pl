@@ -62,7 +62,7 @@ __STYLE__
 # HTML header
 print header('text/html'); 
 
-if (defined param('query') and defined param('width') and defined param('height')) {
+if (param('query') =~ m/\w+/) {
     print "<html>\n<head>\n<title>Gene Atlas Interface</title>\n$style\n";
     
     my $query  = param('query');
@@ -143,7 +143,7 @@ __CHART__
 ;
     }
 }
-elsif (defined param('tissue') and defined param('minexp')) {
+elsif (param('tissue') =~ m/\w+/) {
     print "<html>\n<head>\n<title>Gene Atlas Interface</title>\n$style\n";
     
     my $tissue = param('tissue');
@@ -235,7 +235,7 @@ else {
 	        popup_menu(-name => 'dataset', -values => \@datasets, -default => 'bodymap2_rnaseq'),
 	       );
 	print p("Genes with expression between: ",
-	        textfield(-name =>  'minexp', -size => 4, -value => 0.01),
+	        textfield(-name =>  'minexp', -size => 4, -value => 1),
 	        "-",
 	        textfield(-name =>  'maxexp', -size => 4, -value => 1000)
 	       );
