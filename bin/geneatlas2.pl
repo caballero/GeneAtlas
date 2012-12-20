@@ -69,7 +69,8 @@ if (param('query') =~ m/\w+/) {
     my $table  = param('dataset');
     my $width  = param('width');
     my $height = param('height');
-    my $stack  = 'false'; $stack = 'true' if (param('height') eq 'Yes');
+    my $stack  = 'false'; 
+       $stack  = 'true' if (param('stack') eq 'Yes');
     my $units  = 'RPKM'; 
        $units  = 'log2(UF)' if ($table =~ m/microarray/);
     my @data   = ();
