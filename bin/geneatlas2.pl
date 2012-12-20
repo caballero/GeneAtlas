@@ -69,6 +69,7 @@ if (defined param('query')) {
     my $table  = param('dataset');
     my $width  = param('width');
     my $height = param('height');
+    my $units  = 'RPKM'; $units = 'log2(UF)' if ($table =~ m/microarray/);
     my @data   = ();
     my $data   = "var data = new google.visualization.DataTable();\n";
        $data  .= "data.addColumn('string','Tissue');\n";   
@@ -122,7 +123,9 @@ if (defined param('query')) {
       var options = {
         title: '$query in $table',
         width:  $width,
-        height: $height
+        height: $height,
+        vAxis.title: '$units',
+        hAxis.slantedText: 1
       };
       
       var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
@@ -208,6 +211,8 @@ elsif (defined param('tissue')) {
     <div id="table_div"></div>
   </body>
 __CHART__
+;
+    }
 }
 else {
     print "<html>\n<head>\n<title>Gene Atlas Interface</title>\n$style\n</head>\n<body>";
@@ -231,9 +236,9 @@ else {
 	        popup_menu(-name => 'dataset', -values => \@datasets, -default => 'bodymap2_rnaseq'),
 	       );
 	print p("Genes with expression between: ",
-	        textfield(-name =>  'minexp', -size => 4, -value 0.01),
+	        textfield(-name =>  'minexp', -size => 4, -value => 0.01),
 	        "-",
-	        textfield(-name =>  'maxexp', -size => 4, -value 1000)
+	        textfield(-name =>  'maxexp', -size => 4, -value => 1000)
 	       );
 	print submit(-name => 'Get Expression');
 	print end_form();
