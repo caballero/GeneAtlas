@@ -47,11 +47,6 @@ my $sql      = '';
 my $our_url  = 'http://osiris.systemsbiology.net/~jcaballe/cgi-bin/GA2';
 my @datasets = qw/GSE1133_microarray GSE3526_microarray bodymap2_rnaseq rnaseq_atlas_rev1 GSE2361_microarray bodymap1_rnaseq feastseq_rnaseq/;
 
-#include the header in SQLite
-$sql = ".header ON";
-$sth = $dbh->prepare("$sql")  or fatalError("Error: preparing query '$sql'");
-$sth-> execute() or fatalError("Error: executing query '$sql'");
-	
 # CSS definition
 my $style   =<<__STYLE__
 <style type="text/css">
@@ -146,7 +141,6 @@ print p(i('Contact: Juan Caballero','<br>', 'Institute for Systems Biology (2012
 print end_html;
 
 # Shut down the DB connection
-$sth->finish();
 $dbh->disconnect();
 
 sub fatalError {
