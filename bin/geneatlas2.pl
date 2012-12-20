@@ -48,7 +48,7 @@ my $our_url  = 'http://osiris.systemsbiology.net/~jcaballe/cgi-bin/GA2';
 my @datasets = qw/GSE1133_microarray GSE3526_microarray bodymap2_rnaseq rnaseq_atlas_rev1 GSE2361_microarray bodymap1_rnaseq feastseq_rnaseq/;
 
 #include the header in SQLite
-$sql = '.header ON';
+$sql = ".header ON";
 $sth = $dbh->prepare("$sql")  or fatalError("Error: preparing query '$sql'");
 $sth-> execute() or fatalError("Error: executing query '$sql'");
 	
