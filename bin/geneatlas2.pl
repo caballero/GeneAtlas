@@ -131,6 +131,8 @@ if (defined param('query')) {
   </script>
   </head>
   <body>
+    <h2>GENTLE: Gene Expression in Normal Tissues</h2>
+    <hr>
     <div id="chart_div"></div>
   </body>
 __CHART__
@@ -139,6 +141,7 @@ __CHART__
 }
 else {
     print "<html>\n<head>\n<title>Gene Atlas Interface</title>\n$style\n</head>\n<body>";
+    print h2("GENTLE: Gene Expression in Normal Tissues"), hr();
     print start_form();
     print p("Search Gene: ", 
             textfield(-name => 'query', -size => 10),
