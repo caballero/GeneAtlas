@@ -69,6 +69,7 @@ if (param('query') =~ m/\w+/) {
     my $table  = param('dataset');
     my $width  = param('width');
     my $height = param('height');
+    my $stack  = 'false'; $stack = 'true' if (param('height') eq 'Yes');
     my $units  = 'RPKM'; 
        $units  = 'log2(UF)' if ($table =~ m/microarray/);
     my @data   = ();
@@ -127,6 +128,7 @@ if (param('query') =~ m/\w+/) {
         height: $height,
         vAxis: {title: '$units', viewWindowMode: 'maximized'},
         hAxis: {slantedText: true},
+        isStacked: $stack
       };
       
       var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
@@ -223,6 +225,8 @@ else {
             textfield(-name =>  'width', -size => 4, -value => 900),
             " Height: ",
             textfield(-name => 'height', -size => 4, -value => 300),
+            " Stacked: ",
+            popup_menu(-name => 'stack', -values => ['Yes', 'No'], -default => 'No')
            );
 	print submit(-name => 'Plot Expression');
 	print hr();
