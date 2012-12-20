@@ -74,22 +74,28 @@ if (defined param('query')) {
     my $table = param('dataset');
     my $data  = "var data = google.visualization.arrayToDataTable([\n";
     
+    # Get samples names
+    $sql = "SELECT * FROM samples WHERE dataset = '$table';";
+    $sth = $dbh->prepare("$sql")  or fatalError("Error: preparing query '$sql'");
+	$sth-> execute() or fatalError("Error: executing query '$sql'");
+	while (my ($id, $samples) = $sth->fetchrow_array()) {
+	    my @samples = split (/,/, $samples);
+	    $data .= "['GENE:ID'";
+	    foreach my $sample (@samples) { $data .= ",'$sample'"; }
+	    $data .= "],\n";
+	    last; # only the fist one
+	}
+	
+	# Get data
     $sql = "SELECT * FROM $table WHERE gene = '$query' or id = '$query';";
     $sth = $dbh->prepare("$sql")  or fatalError("Error: preparing query '$sql'");
 	$sth-> execute() or fatalError("Error: executing query '$sql'");
 	while (my @data = $sth->fetchrow_array()) {
 	    my $gen = shift @data;
 	    my $id  = shift @data;
-	    if ($gen eq 'gene') {
-	        $data .= "['ID'";
-	        foreach my $sample (@data) { $data .= ",'$sample'"; }
-	        $data .= "],\n";
-	    }
-	    else {
-	        $data .= "['$gen:$id'";
-	        foreach my $value (@data) { $data .= ",$value"; }
-	        $data .= "],\n";
-	    }
+	    $data .= "['$gen:$id'";
+	    foreach my $value (@data) { $data .= ",$value"; }
+	    $data .= "],\n";
 	}
 	$data =~ s/,\n$/\n/;
 	$data .= "]);\n";
@@ -97,6 +103,7 @@ if (defined param('query')) {
 	    print "</head>\n";
 		print p("No gene found with $query!");
 	}
+	# print chart
 	else {
 	    print <<__CHART__
   <script type="text/javascript" src="https://www.google.com/jsapi"></script>
