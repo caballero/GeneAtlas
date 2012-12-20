@@ -89,7 +89,7 @@ if (defined param('query')) {
 	    my $id    = shift @res;
 	    $data    .= "data.addColumn('number','$id');\n";
 	    my $i     = 0;
-	    while (my $val = shift @res) {
+	    foreach my $val (@res) {
 	        $val = sprintf ("%.2f", $val);
 	        $data[$i] .= ",$val";
 	        $i++;
