@@ -152,35 +152,32 @@ elsif (param('tissue') =~ m/\w+/) {
     my $maxexp = param('maxexp');
     my @data   = ();
     my $data   = "var data = new google.visualization.DataTable();\n";
-       $data  .= "data.addColumn('string','Tissue');\n";   
+       $data  .= "data.addColumn('string','Gene:ID');\n";   
     # Get samples names
     $sql = "SELECT * FROM samples WHERE dataset = '$table';";
     $sth = $dbh->prepare("$sql")  or fatalError("Error: preparing query '$sql'");
 	$sth-> execute() or fatalError("Error: executing query '$sql'");
 	while (my ($id, $samples) = $sth->fetchrow_array()) {
 	    my @samples = split (/,/, $samples);
-	    foreach my $sample (@samples) { push @data, "'$sample'";  }
+	    foreach my $sample (@samples) { $data .= "data.addColumn('number','$sample');\n";  }
 	    last; # only the fist one
 	}
 	
 	# Get data
-    $sql = "SELECT * FROM $table WHERE $tissue >= $minexp and $tissue <= $maxexp";
-    $sth = $dbh->prepare("$sql")  or fatalError("Error: preparing query '$sql'");
+	$data .= "data.addRows([\n";
+    $sql   = "SELECT * FROM $table WHERE $tissue >= $minexp and $tissue <= $maxexp;";
+    $sth   = $dbh->prepare("$sql")  or fatalError("Error: preparing query '$sql'");
 	$sth-> execute() or fatalError("Error: executing query '$sql'");
 	while (my @res = $sth->fetchrow_array()) {
 	    my $gen   = shift @res;
 	    my $id    = shift @res;
-	    $data    .= "data.addColumn('number','$gen:$id');\n";
-	    my $i     = 0;
+	    $data .= "['$gen:$id'";
 	    foreach my $val (@res) {
-	        $val = sprintf ("%.2f", $val);
-	        $data[$i] .= ",$val";
-	        $i++;
+	        $val   = sprintf ("%.4f", $val);
+	        $data .= ",$val";
 	    }
+	    $data .= "],";
 	}
-	
-	$data .= "data.addRows([\n";
-	foreach my $row (@data) { $data .= "[$row],\n";	}
 	$data  =~ s/,$//;
 	$data .= "]);\n";
 	
@@ -206,7 +203,7 @@ elsif (param('tissue') =~ m/\w+/) {
   <body>
     <h2>GENTLE: Gene Expression in Normal Tissues</h2>
     <hr>
-    <p>Search: $tissue in $table [$minexp-$maxexp]</p>
+    <p>Search: genes expressed in "$tissue" from "$table" [$minexp-$maxexp]</p>
     <div id="table_div"></div>
   </body>
 __TABLE__
