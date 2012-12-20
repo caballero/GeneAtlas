@@ -81,7 +81,7 @@ if (defined param('query')) {
 	}
 	
 	# Get data
-    $sql = "SELECT * FROM $table WHERE gene = '$query' or id = '$query';";
+    $sql = "SELECT * FROM $table WHERE gene LIKE '$query' or id LIKE '$query' LIMIT 100;";
     $sth = $dbh->prepare("$sql")  or fatalError("Error: preparing query '$sql'");
 	$sth-> execute() or fatalError("Error: executing query '$sql'");
 	while (my @res = $sth->fetchrow_array()) {
@@ -90,6 +90,7 @@ if (defined param('query')) {
 	    $data    .= "data.addColumn('number','$id');\n";
 	    my $i     = 0;
 	    while (my $val = shift @res) {
+	        $val = sprintf ("%.2f", $val);
 	        $data[$i] .= ",$val";
 	        $i++;
 	    }
@@ -117,9 +118,7 @@ if (defined param('query')) {
       $data
       
       var options = {
-        title: '$query', 
-        height: 400,
-        width: 800
+        title: '$query'
       };
       
       var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
