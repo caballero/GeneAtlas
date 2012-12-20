@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/tools64/bin/perl
 
 =head1 NAME
 
@@ -39,7 +39,7 @@ use DBI;
 use CGI::Pretty qw/:standard/;
 
 # Connecting to the DB
-my $db_file  = './GeneAtlas.db';
+my $db_file  = 'GeneAtlas.db';
 my $dbh      = DBI->connect("dbi:SQLite:dbname=$db_file", "", "") or fatalError("Cannot connect to $
 db_file: Abort");
 my $sth      = '';
@@ -140,7 +140,6 @@ print end_html;
 
 # Shut down the DB connection
 $sth->finish();
-undef $sth;
 $dbh->disconnect();
 
 sub fatalError {
