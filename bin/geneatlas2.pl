@@ -65,11 +65,13 @@ print header('text/html');
 if (defined param('query')) {
     print "<html>\n<head>\n<title>Gene Atlas Interface</title>\n$style\n";
     
-    my $query = param('query');
-    my $table = param('dataset');
-    my @data  = ();
-    my $data  = "var data = new google.visualization.DataTable();\n";
-       $data .= "data.addColumn('string','Tissue');\n";   
+    my $query  = param('query');
+    my $table  = param('dataset');
+    my $width  = param('width');
+    my $height = param('height');
+    my @data   = ();
+    my $data   = "var data = new google.visualization.DataTable();\n";
+       $data  .= "data.addColumn('string','Tissue');\n";   
     # Get samples names
     $sql = "SELECT * FROM samples WHERE dataset = '$table';";
     $sth = $dbh->prepare("$sql")  or fatalError("Error: preparing query '$sql'");
@@ -118,7 +120,9 @@ if (defined param('query')) {
       $data
       
       var options = {
-        title: '$query'
+        title: '$query in $table',
+        width:  $width,
+        height: $height
       };
       
       var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
@@ -140,6 +144,11 @@ else {
             textfield(-name => 'query', -size => 10),
             " in ",
             popup_menu(-name => 'dataset', -values => \@datasets, -default => 'bodymap2_rnaseq')
+           );
+    print p("Width: ", 
+            textfield(-name =>  'width', -size => 4, -value => 900),
+            " Height: ",
+            textfield(-name => 'height', -size => 4, -value => 300),
            );
 	print submit(-name => 'Get Expression');
 	print end_form();
