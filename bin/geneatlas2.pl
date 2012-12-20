@@ -68,7 +68,7 @@ if (defined param('query')) {
     my $query = param('query');
     my $table = param('dataset');
     my @data  = ();
-    my $data  = "var data = google.visualization.DataTable();\n";
+    my $data  = "var data = new google.visualization.DataTable();\n";
        $data .= "data.addColumn('string','Tissue');\n";   
     # Get samples names
     $sql = "SELECT * FROM samples WHERE dataset = '$table';";
@@ -117,7 +117,9 @@ if (defined param('query')) {
       $data
       
       var options = {
-        title: '$query'
+        title: '$query', 
+        height: 400,
+        width: 800
       };
       
       var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
