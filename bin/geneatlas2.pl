@@ -67,17 +67,15 @@ if (defined param('query')) {
     
     my $query = param('query');
     my $table = param('dataset');
-    my $data  = "var data = google.visualization.arrayToDataTable([\n";
-    
+    my $data  = "var data = google.visualization.DataTable();\n";
+       $data .= "data.addColumn('string','Tissue');\n";   
     # Get samples names
     $sql = "SELECT * FROM samples WHERE dataset = '$table';";
     $sth = $dbh->prepare("$sql")  or fatalError("Error: preparing query '$sql'");
 	$sth-> execute() or fatalError("Error: executing query '$sql'");
 	while (my ($id, $samples) = $sth->fetchrow_array()) {
 	    my @samples = split (/,/, $samples);
-	    $data .= "['GENE:ID'";
-	    foreach my $sample (@samples) { $data .= ",'$sample'"; }
-	    $data .= "],\n";
+	    foreach my $sample (@samples) { push @data, "'$sample'";  }
 	    last; # only the fist one
 	}
 	
@@ -85,15 +83,24 @@ if (defined param('query')) {
     $sql = "SELECT * FROM $table WHERE gene = '$query' or id = '$query';";
     $sth = $dbh->prepare("$sql")  or fatalError("Error: preparing query '$sql'");
 	$sth-> execute() or fatalError("Error: executing query '$sql'");
-	while (my @data = $sth->fetchrow_array()) {
-	    my $gen = shift @data;
-	    my $id  = shift @data;
-	    $data .= "['$gen:$id'";
-	    foreach my $value (@data) { $data .= ",$value"; }
-	    $data .= "],\n";
+	while (my @res = $sth->fetchrow_array()) {
+	    my $gen   = shift @res;
+	    my $id    = shift @res;
+	    $data    .= "data.addColumn('number','$id');\n";
+	    my $i     = 0;
+	    while (my $val = shift @res) {
+	        $data[$i] .= ",$value";
+	        $i++;
+	    }
 	}
-	$data =~ s/,\n$/\n/;
+	
+	$data .= "data.addRows([\n";
+	foreach my $row (@data) {
+	    $data .= "[$row],\n";
+	}
+	$data  =~ s/,$//;
 	$data .= "]);\n";
+	
 	if ($sth->rows == 0) {
 	    print "</head>\n";
 		print p("No gene found with $query!");
