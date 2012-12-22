@@ -76,39 +76,39 @@ to the reference genome hg19/GRCh37 with and optimized version of Blat,
 then converted to BAM and transcript quantification with Cufflinks using
 the gene models of Ensembl r64.
 
-_GSE1133_microrray_ was obtained from: 
+*GSE1133_microrray* was obtained from: 
 http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE1133 
-Su AI, Wiltshire T, Batalov S, Lapp H et al. A gene atlas of the mouse 
+[Su AI, Wiltshire T, Batalov S, Lapp H et al. A gene atlas of the mouse 
 and human protein-encoding transcriptomes. Proc Natl Acad Sci U S A 2004
-Apr 20;101(16):6062-7. PMID: 15075390.
+Apr 20;101(16):6062-7. PMID: 15075390.]
 
 *GSE2361_microarray* was obtained from:
 http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE2361
-Ge X, Yamamoto S, Tsutsumi S, Midorikawa Y et al. Interpreting expression
+[Ge X, Yamamoto S, Tsutsumi S, Midorikawa Y et al. Interpreting expression
 profiles of cancers by genome-wide survey of breadth of expression in 
-normal tissues. Genomics 2005 Aug;86(2):127-41. PMID: 15950434.
+normal tissues. Genomics 2005 Aug;86(2):127-41. PMID: 15950434.]
 
-GSE3526_microarray was obtained from: 
+*GSE3526_microarray* was obtained from: 
 http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE3526 
-Roth RB, Hevezi P, Lee J, Willhite D et al. Gene expression analyses 
+[Roth RB, Hevezi P, Lee J, Willhite D et al. Gene expression analyses 
 reveal molecular relationships among 20 regions of the human CNS. 
-Neurogenetics 2006 May;7(2):67-80. PMID: 16572319.
+Neurogenetics 2006 May;7(2):67-80. PMID: 16572319.]
 
-bodymap1_rnaseq was obtained from: 
+*bodymap1_rnaseq* was obtained from: 
 http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE12946
-Wang ET, Sandberg R, Luo S, Khrebtukova I et al. Alternative isoform 
+[Wang ET, Sandberg R, Luo S, Khrebtukova I et al. Alternative isoform 
 regulation in human tissue transcriptomes. Nature 2008 
-Nov 27;456(7221):470-6. 
+Nov 27;456(7221):470-6.]
 
-bodymap2_rnaseq was kindly provided by Gary Schroth (Illumina Co.) 
+*bodymap2_rnaseq* was kindly provided by Gary Schroth (Illumina Co.) 
 The reads are 75b single ends produced in HiSeq2000.
 
-rnaseq_atlas_rev1 was obtained from: 
+*rnaseq_atlas_rev1* was obtained from: 
 http://medicalgenomics.org/rna_seq_atlas
-Castle JC, Armour CD, Löwer M, Haynor D, Biery M, et al. (2010) Digital
+[Castle JC, Armour CD, Löwer M, Haynor D, Biery M, et al. (2010) Digital
 Genome-Wide ncRNA Expression, Including SnoRNAs, across 11 Human Tissues
 Using PolyA-Neutral Amplification. PLoS ONE 5(7): e11779. 
-doi:10.1371/journal.pone.0011779.
+doi:10.1371/journal.pone.0011779]
 
 DATA TABLES
 
