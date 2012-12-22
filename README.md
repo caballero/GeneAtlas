@@ -76,7 +76,7 @@ to the reference genome hg19/GRCh37 with and optimized version of Blat,
 then converted to BAM and transcript quantification with Cufflinks using
 the gene models of Ensembl r64.
 
-`GSE1133_microrray` was obtained from: 
+_GSE1133_microrray_ was obtained from: 
 http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE1133 
 Su AI, Wiltshire T, Batalov S, Lapp H et al. A gene atlas of the mouse 
 and human protein-encoding transcriptomes. Proc Natl Acad Sci U S A 2004
